@@ -1,36 +1,6 @@
 PROJECT (PDFium)
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
 
-    Message ( STATUS "MSVC MD => MT replacing")
-
-    string(REPLACE "/MDd" "/MTd" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-    string(REPLACE "/MDd" "/MTd" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
-    string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-    string(REPLACE "/MD" "/MT" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
-    
-# CONAN START
-# Download automatically, you can also just copy the conan.cmake file
-if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/conan.cmake")
-    message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-    file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
-                  "${CMAKE_CURRENT_BINARY_DIR}/conan.cmake")
-
-endif()
-include(${CMAKE_CURRENT_BINARY_DIR}/conan.cmake)
-
-conan_add_remote(NAME bincrafters 
-                 INDEX 1
-                 URL https://api.bintray.com/conan/bincrafters/public-conan
-                 VERIFY_SSL True)
-
-conan_cmake_run(CONANFILE conanfile.py
-                BASIC_SETUP CMAKE_TARGETS
-                BUILD missing)
-
-include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-include(${CMAKE_CURRENT_BINARY_DIR}/conan_paths.cmake)
-# CONAN END
-
 set(CMAKE_VERBOSE_MAKEFILE ON)
 message(STATUS "System: " ${CMAKE_SYSTEM_NAME} " " ${CMAKE_SYSTEM_VERSION})
 message(STATUS "Processor: " ${CMAKE_HOST_SYSTEM_PROCESSOR})
@@ -990,7 +960,7 @@ target_link_libraries(pdfium
 
 include_directories(./fpdfsdk/include)
 
-add_subdirectory(testing/libfuzzer)
+#add_subdirectory(testing/libfuzzer)
 
 #Install
 file(GLOB INSTALL_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/public/*)
