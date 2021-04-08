@@ -14,11 +14,9 @@
 #include "core/fxcodec/fx_codec.h"
 #include "core/fxcrt/fx_ext.h"
 #include "third_party/base/ptr_util.h"
-#ifdef USE_SYSTEM_ZLIB
-    #include <zlib.h>
-#else
-    #include "third_party/zlib_v128/zlib.h"
-#endif
+
+#include <zlib.h>
+
 
 extern "C" {
 static void* my_alloc_func(void* opaque,

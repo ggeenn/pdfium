@@ -1,11 +1,43 @@
 PROJECT (PDFium)
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
 
+    Message ( STATUS "MSVC MD => MT replacing")
+
+    string(REPLACE "/MDd" "/MTd" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+    string(REPLACE "/MDd" "/MTd" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+    string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+    string(REPLACE "/MD" "/MT" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+    
+# CONAN START
+# Download automatically, you can also just copy the conan.cmake file
+if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/conan.cmake")
+    message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+    file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
+                  "${CMAKE_CURRENT_BINARY_DIR}/conan.cmake")
+
+endif()
+include(${CMAKE_CURRENT_BINARY_DIR}/conan.cmake)
+
+conan_add_remote(NAME bincrafters 
+                 INDEX 1
+                 URL https://api.bintray.com/conan/bincrafters/public-conan
+                 VERIFY_SSL True)
+
+conan_cmake_run(CONANFILE conanfile.py
+                BASIC_SETUP CMAKE_TARGETS
+                BUILD missing)
+
+include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
+include(${CMAKE_CURRENT_BINARY_DIR}/conan_paths.cmake)
+# CONAN END
+
 set(CMAKE_VERBOSE_MAKEFILE ON)
 message(STATUS "System: " ${CMAKE_SYSTEM_NAME} " " ${CMAKE_SYSTEM_VERSION})
 message(STATUS "Processor: " ${CMAKE_HOST_SYSTEM_PROCESSOR})
 message(STATUS "CMake generates: " ${CMAKE_GENERATOR})
 message(STATUS "Build type:" ${CMAKE_BUILD_TYPE})
+
+set(OPJ_STATIC ON)
 
 include(TargetArch.cmake)
 target_architecture(TARGET_ARCH)
@@ -17,13 +49,14 @@ if(USE_BINUTILS_WORKAROUND)
     set(CMAKE_RANLIB gcc-ranlib)
 endif(USE_BINUTILS_WORKAROUND)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wc++0x-compat -fno-exceptions -fvisibility=hidden")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")# -std=c++0x -fno-exceptions -Wc++0x-compat  -fvisibility=hidden
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/public)
 
 if(WIN32)
-  add_definitions(-D_WIN32 -DWIN32_LEAN_AND_MEAN)
+  add_definitions(-D_WIN32 -DWIN32_LEAN_AND_MEAN -DNOMINMAX)
   set(WINDOWS_SOURCES
 core/fxge/win32/cfx_psrenderer.cpp
 core/fxge/win32/cfx_psrenderer.h
@@ -148,53 +181,55 @@ core/ffpdfapi/cmaps/Korea1/UniKS-UCS2-V_1.cpp
 core/ffpdfapi/cmaps/Korea1/UniKS-UTF16-H_0.cpp
   )
 endif(USE_KOREA_MAPS)
+find_package(Freetype REQUIRED)
+#if(USE_SYSTEM_FREETYPE)
+#  find_package(Freetype REQUIRED)
+#  include_directories(${FREETYPE_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS}/freetype)
+#  add_definitions(-DUSE_SYSTEM_FREETYPE)
+#  add_library(internal_freetype OBJECT empty.c)
+#else(USE_SYSTEM_FREETYPE)
+#  add_subdirectory(third_party/freetype)
+#  include_directories(third_party/freetype/include third_party/freetype/include/freetype)
+#endif(USE_SYSTEM_FREETYPE)
 
-if(USE_SYSTEM_FREETYPE)
-  find_package(Freetype REQUIRED)
-  include_directories(${FREETYPE_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS}/freetype)
-  add_definitions(-DUSE_SYSTEM_FREETYPE)
-  add_library(internal_freetype OBJECT empty.c)
-else(USE_SYSTEM_FREETYPE)
-  add_subdirectory(third_party/freetype)
-  include_directories(third_party/freetype/include third_party/freetype/include/freetype)
-endif(USE_SYSTEM_FREETYPE)
+#if(USE_SYSTEM_JPEG)
+#  find_package(JPEG REQUIRED)
+#  include_directories(${JPEG_INCLUDE_DIRS})
+#  add_definitions(-DUSE_SYSTEM_JPEG)
+#  add_library(internal_jpeg OBJECT empty.c)
+#else(USE_SYSTEM_JPEG)
+#  add_subdirectory(third_party/libjpeg)
+#endif(USE_SYSTEM_JPEG)
 
-if(USE_SYSTEM_JPEG)
-  find_package(JPEG REQUIRED)
-  include_directories(${JPEG_INCLUDE_DIRS})
-  add_definitions(-DUSE_SYSTEM_JPEG)
-  add_library(internal_jpeg OBJECT empty.c)
-else(USE_SYSTEM_JPEG)
-  add_subdirectory(third_party/libjpeg)
-endif(USE_SYSTEM_JPEG)
+#if(USE_SYSTEM_ZLIB)
+#  find_package(ZLIB REQUIRED)
+#  include_directories(${ZLIB_INCLUDE_DIRS})
+#  add_definitions(-DUSE_SYSTEM_ZLIB)
+#  add_library(internal_zlib OBJECT empty.c)
+#else(USE_SYSTEM_ZLIB)
+#  add_subdirectory(third_party/zlib_v128)
+#endif(USE_SYSTEM_ZLIB)
 
-if(USE_SYSTEM_ZLIB)
-  find_package(ZLIB REQUIRED)
-  include_directories(${ZLIB_INCLUDE_DIRS})
-  add_definitions(-DUSE_SYSTEM_ZLIB)
-  add_library(internal_zlib OBJECT empty.c)
-else(USE_SYSTEM_ZLIB)
-  add_subdirectory(third_party/zlib_v128)
-endif(USE_SYSTEM_ZLIB)
+#find_package(LCMS REQUIRED)
+#include_directories(${LCMS_INCLUDE_DIRS})
+#if(USE_SYSTEM_LCMS2)
+#  find_package(LCMS2 REQUIRED)
+#  include_directories(${LCMS2_INCLUDE_DIRS})
+#  add_definitions(-DUSE_SYSTEM_LCMS2)
+#  add_library(internal_lcms2 OBJECT empty.c third_party/lcms2-2.6/src/cmsmd5.c)
+#else(USE_SYSTEM_LCMS2)
+#  add_subdirectory(third_party/lcms2-2.6)
+#endif(USE_SYSTEM_LCMS2)
 
-if(USE_SYSTEM_LCMS2)
-  find_package(LCMS2 REQUIRED)
-  include_directories(${LCMS2_INCLUDE_DIRS})
-  add_definitions(-DUSE_SYSTEM_LCMS2)
-  add_library(internal_lcms2 OBJECT empty.c third_party/lcms2-2.6/src/cmsmd5.c)
-else(USE_SYSTEM_LCMS2)
-  add_subdirectory(third_party/lcms2-2.6)
-endif(USE_SYSTEM_LCMS2)
-
-if(USE_SYSTEM_OPENJPEG)
-  find_package(OpenJpeg REQUIRED)
-  include_directories(${OPENJPEG_INCLUDE_DIR})
-  add_definitions(-DUSE_SYSTEM_OPENJPEG)
-  add_library(internal_openjpeg OBJECT empty.c)
-else(USE_SYSTEM_OPENJPEG)
-  add_subdirectory(third_party/libopenjpeg20)
-  add_definitions(-DOPJ_STATIC)
-endif(USE_SYSTEM_OPENJPEG)
+#if(USE_SYSTEM_OPENJPEG)
+#  find_package(OpenJpeg REQUIRED)
+#  include_directories(${OPENJPEG_INCLUDE_DIR})
+#  add_definitions(-DUSE_SYSTEM_OPENJPEG)
+#  add_library(internal_openjpeg OBJECT empty.c)
+#else(USE_SYSTEM_OPENJPEG)
+#  add_subdirectory(third_party/libopenjpeg20)
+#  add_definitions(-DOPJ_STATIC)
+#endif(USE_SYSTEM_OPENJPEG)
 
 #Use own jbig2 in anytime
 add_subdirectory(core/fxcodec/jbig2)
@@ -923,34 +958,39 @@ ${AGG_SOURCES}
 if(USE_STATIC_LIBRARY)
     add_library(pdfium STATIC
         ${ALL_SOURCES}
-        $<TARGET_OBJECTS:internal_jpeg>
-        $<TARGET_OBJECTS:internal_zlib>
-        $<TARGET_OBJECTS:internal_lcms2>
-        $<TARGET_OBJECTS:internal_openjpeg>
+        #$<TARGET_OBJECTS:internal_jpeg>
+        #$<TARGET_OBJECTS:internal_zlib>
+        #$<TARGET_OBJECTS:internal_lcms2>
+        #$<TARGET_OBJECTS:internal_openjpeg>
         $<TARGET_OBJECTS:internal_jbig2>
-        $<TARGET_OBJECTS:internal_freetype>
+        #$<TARGET_OBJECTS:internal_freetype>
     )
 else(USE_STATIC_LIBRARY)
     add_library(pdfium SHARED
         ${ALL_SOURCES}
-        $<TARGET_OBJECTS:internal_jpeg>
-        $<TARGET_OBJECTS:internal_zlib>
-        $<TARGET_OBJECTS:internal_lcms2>
-        $<TARGET_OBJECTS:internal_openjpeg>
+        #$<TARGET_OBJECTS:internal_jpeg>
+        #$<TARGET_OBJECTS:internal_zlib>
+        #$<TARGET_OBJECTS:internal_lcms2>
+        #$<TARGET_OBJECTS:internal_openjpeg>
         $<TARGET_OBJECTS:internal_jbig2>
-        $<TARGET_OBJECTS:internal_freetype>
+        #$<TARGET_OBJECTS:internal_freetype>
     )
 endif(USE_STATIC_LIBRARY)
 
+target_include_directories(pdfium PRIVATE ${CONAN_INCLUDE_DIRS})
 target_link_libraries(pdfium
-  ${FREETYPE_LIBRARIES}
-  ${JPEG_LIBRARY}
-  ${LCMS2_LIBRARY}
-  ${ZLIB_LIBRARY}
-  ${OPENJPEG_LIBRARY}
+  #${FREETYPE_LIBRARIES}
+  #${JPEG_LIBRARY}
+  #${LCMS2_LIBRARY}
+  #${LCMS_LIBRARY}
+  #${ZLIB_LIBRARY}
+  #${OPENJPEG_LIBRARY}
+  ${CONAN_LIBS}
 )
 
 include_directories(./fpdfsdk/include)
+
+add_subdirectory(testing/libfuzzer)
 
 #Install
 file(GLOB INSTALL_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/public/*)

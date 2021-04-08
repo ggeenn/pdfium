@@ -13,11 +13,8 @@
 #include "core/fxcodec/codec/codec_int.h"
 #include "core/fxcodec/fx_codec.h"
 #include "core/fxcrt/fx_safe_types.h"
-#ifdef USE_SYSTEM_OPENJPEG
-  #include <openjpeg.h>
-#else
-  #include "third_party/libopenjpeg20/openjpeg.h"
-#endif
+#include <openjpeg.h>
+
 #ifdef USE_SYSTEM_LCMS2
   #include <lcms2.h>
 #else
@@ -770,7 +767,7 @@ bool CJPX_Decoder::Init(const unsigned char* src_data, uint32_t src_size) {
     image = nullptr;
     return false;
   }
-  image->pdfium_use_colorspace = !!m_ColorSpace;
+  //image->pdfium_use_colorspace = !!m_ColorSpace;
 
   if (!parameters.nb_tile_to_decode) {
     if (!opj_set_decode_area(l_codec, image, parameters.DA_x0, parameters.DA_y0,

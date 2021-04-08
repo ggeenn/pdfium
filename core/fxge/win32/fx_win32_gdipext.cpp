@@ -5,7 +5,7 @@
 // Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
 
 #include <windows.h>
-
+#include <objidl.h>
 #include <algorithm>
 #include <memory>
 

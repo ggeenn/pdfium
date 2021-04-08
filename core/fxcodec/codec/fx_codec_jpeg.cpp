@@ -17,11 +17,9 @@
 
 extern "C" {
 #undef FAR
-#if defined(USE_SYSTEM_JPEG)
+
     #include <jpeglib.h>
-#else
-    #include "third_party/libjpeg/jpeglib.h"
-#endif
+
 }
 
 extern "C" {
