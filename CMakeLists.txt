@@ -1,5 +1,5 @@
 PROJECT (PDFium)
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8.12)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 message(STATUS "System: " ${CMAKE_SYSTEM_NAME} " " ${CMAKE_SYSTEM_VERSION})
@@ -152,54 +152,6 @@ core/ffpdfapi/cmaps/Korea1/UniKS-UTF16-H_0.cpp
   )
 endif(USE_KOREA_MAPS)
 find_package(Freetype REQUIRED)
-#if(USE_SYSTEM_FREETYPE)
-#  find_package(Freetype REQUIRED)
-#  include_directories(${FREETYPE_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS}/freetype)
-#  add_definitions(-DUSE_SYSTEM_FREETYPE)
-#  add_library(internal_freetype OBJECT empty.c)
-#else(USE_SYSTEM_FREETYPE)
-#  add_subdirectory(third_party/freetype)
-#  include_directories(third_party/freetype/include third_party/freetype/include/freetype)
-#endif(USE_SYSTEM_FREETYPE)
-
-#if(USE_SYSTEM_JPEG)
-#  find_package(JPEG REQUIRED)
-#  include_directories(${JPEG_INCLUDE_DIRS})
-#  add_definitions(-DUSE_SYSTEM_JPEG)
-#  add_library(internal_jpeg OBJECT empty.c)
-#else(USE_SYSTEM_JPEG)
-#  add_subdirectory(third_party/libjpeg)
-#endif(USE_SYSTEM_JPEG)
-
-#if(USE_SYSTEM_ZLIB)
-#  find_package(ZLIB REQUIRED)
-#  include_directories(${ZLIB_INCLUDE_DIRS})
-#  add_definitions(-DUSE_SYSTEM_ZLIB)
-#  add_library(internal_zlib OBJECT empty.c)
-#else(USE_SYSTEM_ZLIB)
-#  add_subdirectory(third_party/zlib_v128)
-#endif(USE_SYSTEM_ZLIB)
-
-#find_package(LCMS REQUIRED)
-#include_directories(${LCMS_INCLUDE_DIRS})
-#if(USE_SYSTEM_LCMS2)
-#  find_package(LCMS2 REQUIRED)
-#  include_directories(${LCMS2_INCLUDE_DIRS})
-#  add_definitions(-DUSE_SYSTEM_LCMS2)
-#  add_library(internal_lcms2 OBJECT empty.c third_party/lcms2-2.6/src/cmsmd5.c)
-#else(USE_SYSTEM_LCMS2)
-#  add_subdirectory(third_party/lcms2-2.6)
-#endif(USE_SYSTEM_LCMS2)
-
-#if(USE_SYSTEM_OPENJPEG)
-#  find_package(OpenJpeg REQUIRED)
-#  include_directories(${OPENJPEG_INCLUDE_DIR})
-#  add_definitions(-DUSE_SYSTEM_OPENJPEG)
-#  add_library(internal_openjpeg OBJECT empty.c)
-#else(USE_SYSTEM_OPENJPEG)
-#  add_subdirectory(third_party/libopenjpeg20)
-#  add_definitions(-DOPJ_STATIC)
-#endif(USE_SYSTEM_OPENJPEG)
 
 #Use own jbig2 in anytime
 add_subdirectory(core/fxcodec/jbig2)
@@ -918,10 +870,10 @@ ${FXGE_SOURCES}
 ${FXEDIT_SOURCES}
 ${PDFWINDOW_SOURCES}
 ${FORMFILLER_SOURCES}
- ${FPDFSDK_SOURCES}
- ${WINDOWS_SOURCES}
- ${JS_STUB_SOURCES}
- ${BIGINT_SOURCES}
+${FPDFSDK_SOURCES}
+${WINDOWS_SOURCES}
+${JS_STUB_SOURCES}
+${BIGINT_SOURCES}
 ${AGG_SOURCES}
 )
 
@@ -946,6 +898,13 @@ else(USE_STATIC_LIBRARY)
         #$<TARGET_OBJECTS:internal_freetype>
     )
 endif(USE_STATIC_LIBRARY)
+
+target_include_directories(pdfium PUBLIC
+	"${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/public"
+    "${COMMON_CMAKE_SOURCE_DIR}/3rdParty/pdf-text-extraction/LibTiff"
+    "${COMMON_CMAKE_SOURCE_DIR}/3rdParty/pdf-text-extraction/TextExtraction"
+)
 
 target_include_directories(pdfium PRIVATE ${CONAN_INCLUDE_DIRS})
 target_link_libraries(pdfium
