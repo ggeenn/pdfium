@@ -48,4 +48,4 @@ JBig2_TrdProc.cpp
 JBig2_TrdProc.h
 )
 
-add_library(internal_jbig2 OBJECT ${jbig2_SOURCES})
+add_library(internal_jbig2 STATIC ${jbig2_SOURCES})

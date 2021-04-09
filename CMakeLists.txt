@@ -22,22 +22,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/public)
 
 if(WIN32)
+  file(GLOB_RECURSE PDFIUM_PLATFORM_SOURCES "core/fxge/win32/*")
   add_definitions(-D_WIN32 -DWIN32_LEAN_AND_MEAN -DNOMINMAX)
-  set(WINDOWS_SOURCES
-core/fxge/win32/cfx_psrenderer.cpp
-core/fxge/win32/cfx_psrenderer.h
-core/fxge/win32/cfx_windowsdib.h
-core/fxge/win32/cpsoutput.cpp
-core/fxge/win32/cpsoutput.h
-core/fxge/win32/dwrite_int.h
-core/fxge/win32/fx_win32_device.cpp
-core/fxge/win32/fx_win32_dib.cpp
-core/fxge/win32/fx_win32_dwrite.cpp
-core/fxge/win32/fx_win32_gdipext.cpp
-core/fxge/win32/fx_win32_print.cpp
-core/fxge/win32/win32_int.h
-  )
 else(WIN32)
+  file(GLOB_RECURSE PDFIUM_PLATFORM_SOURCES "core/fxge/apple/*")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -pthread")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -pthread")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -Wl,-z,defs")
@@ -848,28 +836,20 @@ ${FXEDIT_SOURCES}
 ${PDFWINDOW_SOURCES}
 ${FORMFILLER_SOURCES}
 ${FPDFSDK_SOURCES}
-${WINDOWS_SOURCES}
+${PDFIUM_PLATFORM_SOURCES}
 ${JS_STUB_SOURCES}
 ${BIGINT_SOURCES}
 ${AGG_SOURCES}
 )
 
 if(USE_STATIC_LIBRARY)
-    add_library(pdfium STATIC
-        ${ALL_SOURCES}
-        $<TARGET_OBJECTS:internal_jbig2>
-    )
+    add_library(pdfium STATIC ${ALL_SOURCES})
 else(USE_STATIC_LIBRARY)
-    add_library(pdfium SHARED
-        ${ALL_SOURCES}
-        $<TARGET_OBJECTS:internal_jbig2>
-    )
+    add_library(pdfium SHARED ${ALL_SOURCES})
 endif(USE_STATIC_LIBRARY)
 
-target_include_directories(pdfium PUBLIC
-	"${CMAKE_CURRENT_SOURCE_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/public"
-)
+target_include_directories(pdfium PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}"
+                                         "${CMAKE_CURRENT_SOURCE_DIR}/public")
 
 target_include_directories(pdfium PRIVATE ${CONAN_INCLUDE_DIRS})
 target_link_libraries(pdfium ${CONAN_LIBS})
