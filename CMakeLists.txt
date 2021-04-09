@@ -2,16 +2,10 @@ PROJECT (PDFium)
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.12)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-message(STATUS "System: " ${CMAKE_SYSTEM_NAME} " " ${CMAKE_SYSTEM_VERSION})
-message(STATUS "Processor: " ${CMAKE_HOST_SYSTEM_PROCESSOR})
-message(STATUS "CMake generates: " ${CMAKE_GENERATOR})
-message(STATUS "Build type:" ${CMAKE_BUILD_TYPE})
 
-set(OPJ_STATIC ON)
-
-include(TargetArch.cmake)
-target_architecture(TARGET_ARCH)
-message(STATUS "Target: " ${TARGET_ARCH})
+#include(TargetArch.cmake)
+#target_architecture(TARGET_ARCH)
+#message(STATUS "Target: " ${TARGET_ARCH})
 
 set(USE_BINUTILS_WORKAROUND ON CACHE BOOL "use gcc-ar and gcc-ranlib instead ar and ranlib (is needed for LTO)")
 if(USE_BINUTILS_WORKAROUND)
@@ -19,8 +13,10 @@ if(USE_BINUTILS_WORKAROUND)
     set(CMAKE_RANLIB gcc-ranlib)
 endif(USE_BINUTILS_WORKAROUND)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")# -std=c++0x -fno-exceptions -Wc++0x-compat  -fvisibility=hidden
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
+if(APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -fno-exceptions -Wc++0x-compat  -fvisibility=hidden")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
+endif(APPLE)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/public)
@@ -49,21 +45,12 @@ endif(WIN32)
 
 set(USE_STATIC_LIBRARY ON CACHE BOOL "build as static library. Otherwise - shared")
 
-#3dparty libraries
-set(USE_SYSTEM_FREETYPE ON CACHE BOOL "use system freetype")
-set(USE_SYSTEM_JPEG ON CACHE BOOL "use system libjpeg")
-set(USE_SYSTEM_ZLIB ON CACHE BOOL "use system zlib")
-set(USE_SYSTEM_LCMS2 ON CACHE BOOL "use system lcms2")
-set(USE_SYSTEM_OPENJPEG ON CACHE BOOL "use system openjpeg" )
-
 #hieroglyphs support
 set(USE_GB1_MAPS OFF CACHE BOOL "use GB1 maps")
 set(USE_CNS1_MAPS OFF CACHE BOOL "use CNS1 maps")
 set(USE_JAPAN1_MAPS OFF CACHE BOOL "use JAPAN1 maps")
 set(USE_KOREA_MAPS OFF CACHE BOOL "use KOREA maps")
 # set(USE_JPX_DECODER OFF CACHE BOOL "use jpx-decoder")
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
 if(USE_CNS1_MAPS)
   add_definitions(-DUSE_CNS1_MAPS)
@@ -155,16 +142,6 @@ find_package(Freetype REQUIRED)
 
 #Use own jbig2 in anytime
 add_subdirectory(core/fxcodec/jbig2)
-
-if(TARGET_ARCH STREQUAL "x86_64")
-    add_definitions(
-	-D_FX_CPU_=_FX_X64_
-    )
-elseif(TARGET_ARCH STREQUAL "i386")
-    add_definitions(
-	-D_FX_CPU_=_FX_X86_
-    )
-endif(TARGET_ARCH STREQUAL "x86_64")
 
 ######################### FPDFSDK #############################################
 set(FPDFSDK_SOURCES
@@ -880,46 +857,24 @@ ${AGG_SOURCES}
 if(USE_STATIC_LIBRARY)
     add_library(pdfium STATIC
         ${ALL_SOURCES}
-        #$<TARGET_OBJECTS:internal_jpeg>
-        #$<TARGET_OBJECTS:internal_zlib>
-        #$<TARGET_OBJECTS:internal_lcms2>
-        #$<TARGET_OBJECTS:internal_openjpeg>
         $<TARGET_OBJECTS:internal_jbig2>
-        #$<TARGET_OBJECTS:internal_freetype>
     )
 else(USE_STATIC_LIBRARY)
     add_library(pdfium SHARED
         ${ALL_SOURCES}
-        #$<TARGET_OBJECTS:internal_jpeg>
-        #$<TARGET_OBJECTS:internal_zlib>
-        #$<TARGET_OBJECTS:internal_lcms2>
-        #$<TARGET_OBJECTS:internal_openjpeg>
         $<TARGET_OBJECTS:internal_jbig2>
-        #$<TARGET_OBJECTS:internal_freetype>
     )
 endif(USE_STATIC_LIBRARY)
 
 target_include_directories(pdfium PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/public"
-    "${COMMON_CMAKE_SOURCE_DIR}/3rdParty/pdf-text-extraction/LibTiff"
-    "${COMMON_CMAKE_SOURCE_DIR}/3rdParty/pdf-text-extraction/TextExtraction"
 )
 
 target_include_directories(pdfium PRIVATE ${CONAN_INCLUDE_DIRS})
-target_link_libraries(pdfium
-  #${FREETYPE_LIBRARIES}
-  #${JPEG_LIBRARY}
-  #${LCMS2_LIBRARY}
-  #${LCMS_LIBRARY}
-  #${ZLIB_LIBRARY}
-  #${OPENJPEG_LIBRARY}
-  ${CONAN_LIBS}
-)
+target_link_libraries(pdfium ${CONAN_LIBS})
 
 include_directories(./fpdfsdk/include)
-
-#add_subdirectory(testing/libfuzzer)
 
 #Install
 file(GLOB INSTALL_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/public/*)

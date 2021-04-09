@@ -7,11 +7,7 @@
 #include "core/fxcodec/codec/codec_int.h"
 #include "core/fxcodec/fx_codec.h"
 
-#ifdef USE_SYTEM_LCMS2
-  #include <lcms2.h>
-#else
-  #include "third_party/lcms2-2.6/include/lcms2.h"
-#endif
+#include <lcms2.h>
 
 struct CLcmsCmm {
   cmsHTRANSFORM m_hTransform;
