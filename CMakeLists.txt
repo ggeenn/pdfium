@@ -23,21 +23,15 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/public)
 
 if(WIN32)
   add_definitions(-D_WIN32 -DWIN32_LEAN_AND_MEAN -DNOMINMAX)
-  set(WINDOWS_SOURCES
-core/fxge/win32/cfx_psrenderer.cpp
-core/fxge/win32/cfx_psrenderer.h
-core/fxge/win32/cfx_windowsdib.h
-core/fxge/win32/cpsoutput.cpp
-core/fxge/win32/cpsoutput.h
-core/fxge/win32/dwrite_int.h
-core/fxge/win32/fx_win32_device.cpp
-core/fxge/win32/fx_win32_dib.cpp
-core/fxge/win32/fx_win32_dwrite.cpp
-core/fxge/win32/fx_win32_gdipext.cpp
-core/fxge/win32/fx_win32_print.cpp
-core/fxge/win32/win32_int.h
+  file(GLOB PLATFORM_SOURCES
+    "core/fxge/win32/*.cpp"
+    "core/fxge/win32/*.h"
   )
 else(WIN32)
+  file(GLOB PLATFORM_SOURCES
+    "core/fxge/apple/*.cpp"
+    "core/fxge/apple/*.h"
+  )
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -pthread")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -pthread")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -Wl,-z,defs")
@@ -848,7 +842,7 @@ ${FXEDIT_SOURCES}
 ${PDFWINDOW_SOURCES}
 ${FORMFILLER_SOURCES}
 ${FPDFSDK_SOURCES}
-${WINDOWS_SOURCES}
+${PLATFORM_SOURCES}
 ${JS_STUB_SOURCES}
 ${BIGINT_SOURCES}
 ${AGG_SOURCES}
