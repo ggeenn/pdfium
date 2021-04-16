@@ -857,22 +857,20 @@ ${AGG_SOURCES}
 if(USE_STATIC_LIBRARY)
     add_library(pdfium STATIC
         ${ALL_SOURCES}
-        $<TARGET_OBJECTS:internal_jbig2>
     )
 else(USE_STATIC_LIBRARY)
     add_library(pdfium SHARED
         ${ALL_SOURCES}
-        $<TARGET_OBJECTS:internal_jbig2>
     )
 endif(USE_STATIC_LIBRARY)
 
 target_include_directories(pdfium PUBLIC
-	"${CMAKE_CURRENT_SOURCE_DIR}"
+	  "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/public"
 )
 
 target_include_directories(pdfium PRIVATE ${CONAN_INCLUDE_DIRS})
-target_link_libraries(pdfium ${CONAN_LIBS})
+target_link_libraries(pdfium internal_jbig2 ${CONAN_LIBS})
 
 include_directories(./fpdfsdk/include)
 
