@@ -13,10 +13,10 @@ if(USE_BINUTILS_WORKAROUND)
     set(CMAKE_RANLIB gcc-ranlib)
 endif(USE_BINUTILS_WORKAROUND)
 
-if(APPLE)
+if(APPLE OR LINUX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -fno-exceptions -Wc++0x-compat  -fvisibility=hidden")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
-endif(APPLE)
+endif(APPLE OR LINUX)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/public)
@@ -27,7 +27,7 @@ if(WIN32)
     "core/fxge/win32/*.cpp"
     "core/fxge/win32/*.h"
   )
-else(WIN32)
+elseif(APPLE)
   file(GLOB PLATFORM_SOURCES
     "core/fxge/apple/*.cpp"
     "core/fxge/apple/*.h"
@@ -35,6 +35,8 @@ else(WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -pthread")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -pthread")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -Wl,-z,defs")
+elseif(LINUX)
+
 endif(WIN32)
 
 set(USE_STATIC_LIBRARY ON CACHE BOOL "build as static library. Otherwise - shared")

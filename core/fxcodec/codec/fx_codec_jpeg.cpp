@@ -54,11 +54,11 @@ static void _src_skip_data(struct jpeg_decompress_struct* cinfo, long num) {
 }
 
 static boolean _src_fill_buffer(j_decompress_ptr cinfo) {
-  return 0;
+  return static_cast<boolean>(0);
 }
 
 static boolean _src_resync(j_decompress_ptr cinfo, int desired) {
-  return 0;
+  return static_cast<boolean>(0);
 }
 
 static void _error_do_nothing(j_common_ptr cinfo) {}
@@ -127,7 +127,7 @@ static bool JpegLoadInfo(const uint8_t* src_buf,
     jpeg_destroy_decompress(&cinfo);
     return false;
   }
-  int ret = jpeg_read_header(&cinfo, true);
+  int ret = jpeg_read_header(&cinfo, static_cast<boolean>(true));
   if (ret != JPEG_HEADER_OK) {
     jpeg_destroy_decompress(&cinfo);
     return false;
@@ -211,7 +211,7 @@ bool CCodec_JpegDecoder::InitDecode() {
   }
   cinfo.image_width = m_OrigWidth;
   cinfo.image_height = m_OrigHeight;
-  int ret = jpeg_read_header(&cinfo, true);
+  int ret = jpeg_read_header(&cinfo, static_cast<boolean>(true));
   if (ret != JPEG_HEADER_OK)
     return false;
 
@@ -435,7 +435,7 @@ int CCodec_JpegModule::ReadHeader(FXJPEG_Context* ctx,
   if (setjmp(ctx->m_JumpMark) == -1)
     return 1;
 
-  int ret = jpeg_read_header(&ctx->m_Info, true);
+  int ret = jpeg_read_header(&ctx->m_Info, static_cast<boolean>(true));
   if (ret == JPEG_SUSPENDED)
     return 2;
   if (ret != JPEG_HEADER_OK)
