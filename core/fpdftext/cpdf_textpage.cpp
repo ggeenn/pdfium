@@ -718,21 +718,28 @@ void CPDF_TextPage::CloseTempLine() {
     }
     bPrevSpace = true;
   }
+  // ignoring segment impl
   CFX_BidiString bidi(str);
-  if (m_parserflag == FPDFText_Direction::Right)
-    bidi.SetOverallDirectionRight();
+  // if (m_parserflag == FPDFText_Direction::Right)
+  //  bidi.SetOverallDirectionRight();
   CFX_BidiChar::Direction eCurrentDirection = bidi.OverallDirection();
-  for (const auto& segment : bidi) {
-    if (segment.direction == CFX_BidiChar::RIGHT ||
-        (segment.direction == CFX_BidiChar::NEUTRAL &&
-         eCurrentDirection == CFX_BidiChar::RIGHT)) {
-      eCurrentDirection = CFX_BidiChar::RIGHT;
-      for (int m = segment.start + segment.count; m > segment.start; --m)
-        AddCharInfoByRLDirection(bidi.CharAt(m - 1), m_TempCharList[m - 1]);
-    } else {
-      eCurrentDirection = CFX_BidiChar::LEFT;
-      for (int m = segment.start; m < segment.start + segment.count; m++)
-        AddCharInfoByLRDirection(bidi.CharAt(m), m_TempCharList[m]);
+  if (eCurrentDirection == CFX_BidiChar::RIGHT) {
+    for (int i = 0; i < str.GetLength(); i++) {
+      AddCharInfoByRLDirection(bidi.CharAt(i), m_TempCharList[i]);
+    }
+  } else {
+     for (const auto& segment : bidi) {
+      if (segment.direction == CFX_BidiChar::RIGHT ||
+          (segment.direction == CFX_BidiChar::NEUTRAL &&
+           eCurrentDirection == CFX_BidiChar::RIGHT)) {
+        eCurrentDirection = CFX_BidiChar::RIGHT;
+        for (int m = segment.start + segment.count; m > segment.start; --m)
+          AddCharInfoByRLDirection(bidi.CharAt(m - 1), m_TempCharList[m - 1]);
+      } else {
+        eCurrentDirection = CFX_BidiChar::LEFT;
+        for (int m = segment.start; m < segment.start + segment.count; m++)
+          AddCharInfoByLRDirection(bidi.CharAt(m), m_TempCharList[m]);
+      }
     }
   }
   m_TempCharList.clear();
