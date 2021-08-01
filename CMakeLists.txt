@@ -1,4 +1,4 @@
-PROJECT (PDFium)
+PROJECT (pdfium)
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.12)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -832,46 +832,48 @@ third_party/agg23/agg_vertex_sequence.h
 )
 
 set(ALL_SOURCES
-${FDRM_SOURCES}
-${FPDFDOC_SOURCES}
-${FPDFSDK_SOURCES}
-${FPDFAPI_SOURCES} ${FPDFAPI_GB1_SOURCES} ${FPDFAPI_CNS1_SOURCES} ${FPDFAPI_JAPAN1_SOURCES} ${FPDFAPI_KOREA_SOURCES}
-${FPDFTEXT_SOURCES}
-${FXCODEC_SOURCES}
-${FXCRT_SOURCES}
-${FXGE_SOURCES}
-${FXEDIT_SOURCES}
-${PDFWINDOW_SOURCES}
-${FORMFILLER_SOURCES}
-${FPDFSDK_SOURCES}
-${PLATFORM_SOURCES}
-${JS_STUB_SOURCES}
-${BIGINT_SOURCES}
-${AGG_SOURCES}
+    ${FDRM_SOURCES}
+    ${FPDFDOC_SOURCES}
+    ${FPDFSDK_SOURCES}
+    ${FPDFAPI_SOURCES} ${FPDFAPI_GB1_SOURCES} ${FPDFAPI_CNS1_SOURCES} ${FPDFAPI_JAPAN1_SOURCES} ${FPDFAPI_KOREA_SOURCES}
+    ${FPDFTEXT_SOURCES}
+    ${FXCODEC_SOURCES}
+    ${FXCRT_SOURCES}
+    ${FXGE_SOURCES}
+    ${FXEDIT_SOURCES}
+    ${PDFWINDOW_SOURCES}
+    ${FORMFILLER_SOURCES}
+    ${FPDFSDK_SOURCES}
+    ${PLATFORM_SOURCES}
+    ${JS_STUB_SOURCES}
+    ${BIGINT_SOURCES}
+    ${AGG_SOURCES}
 )
 
 if(USE_STATIC_LIBRARY)
-    add_library(pdfium STATIC
-        ${ALL_SOURCES}
-    )
+    add_library(${PROJECT_NAME} STATIC ${ALL_SOURCES})
 else(USE_STATIC_LIBRARY)
-    add_library(pdfium SHARED
-        ${ALL_SOURCES}
-    )
+    add_library(${PROJECT_NAME} SHARED ${ALL_SOURCES})
 endif(USE_STATIC_LIBRARY)
 
-target_include_directories(pdfium PUBLIC
-	  "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/public"
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/public
+        ./fpdfsdk/include
 )
 
-target_include_directories(pdfium PRIVATE ${CONAN_INCLUDE_DIRS})
-target_link_libraries(pdfium internal_jbig2 ${CONAN_LIBS})
-
-include_directories(./fpdfsdk/include)
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+        internal_jbig2
+        CONAN_PKG::freetype
+        CONAN_PKG::openjpeg
+        CONAN_PKG::lcms
+        CONAN_PKG::libjpeg
+)
 
 #Install
 file(GLOB INSTALL_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/public/*)
 install(FILES ${INSTALL_HEADERS} DESTINATION include/pdfium)
 
-install (TARGETS pdfium DESTINATION lib)
+install (TARGETS ${PROJECT_NAME} DESTINATION lib)
