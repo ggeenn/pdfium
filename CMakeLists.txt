@@ -855,6 +855,7 @@ if(USE_STATIC_LIBRARY)
 else(USE_STATIC_LIBRARY)
     add_library(${PROJECT_NAME} SHARED ${ALL_SOURCES})
 endif(USE_STATIC_LIBRARY)
+set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER "parsing")
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC

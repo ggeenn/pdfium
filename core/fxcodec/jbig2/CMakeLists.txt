@@ -1,3 +1,4 @@
+project(internal_jbig2 DESCRIPTION "Internal jbig2 library of pdfium.")
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.12)
 
 if(WIN32)
@@ -48,4 +49,6 @@ JBig2_TrdProc.cpp
 JBig2_TrdProc.h
 )
 
-add_library(internal_jbig2 STATIC ${jbig2_SOURCES})
+add_library(${PROJECT_NAME} STATIC ${jbig2_SOURCES})
+set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER "parsing")
+
